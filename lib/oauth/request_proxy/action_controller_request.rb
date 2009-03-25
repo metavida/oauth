@@ -12,7 +12,14 @@ module OAuth::RequestProxy
     end
 
     def uri
-      request.url
+      case request
+      when ActionController::CgiRequest
+        tmp = URI.parse("#{ request.protocol }#{ request.host_with_port }#{ request.cgi.path_info }")
+        tmp.query = request.query_string unless request.query_string.blank?
+        tmp.to_s
+      else
+        request.url
+      end
     end
 
     def parameters
