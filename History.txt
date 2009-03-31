@@ -1,6 +1,8 @@
 == 0.3.3 / 0.4.0
 
 * Corrected OAuth XMPP namespace (Seth)
+* Fixed edge cases in  ActionoControllerRequest proxy where params were being
+  incorrectly signed (Marcos Wright Kuhns)
 
 == 0.3.2 2009-03-23
 
