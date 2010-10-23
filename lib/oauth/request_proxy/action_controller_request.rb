@@ -1,6 +1,6 @@
 require 'active_support'
+require 'action_controller'
 require 'action_controller/request'
-require 'oauth/request_proxy/base'
 require 'uri'
 
 module OAuth::RequestProxy
@@ -12,14 +12,7 @@ module OAuth::RequestProxy
     end
 
     def uri
-      case request
-      when ActionController::CgiRequest
-        tmp = URI.parse("#{ request.protocol }#{ request.host_with_port }#{ request.cgi.path_info }")
-        tmp.query = request.query_string unless request.query_string.blank?
-        tmp.to_s
-      else
-        request.url
-      end
+      request.url
     end
 
     def parameters
@@ -41,7 +34,8 @@ module OAuth::RequestProxy
 
       unless options[:clobber_request]
         params << header_params.to_query
-        params << request.query_string unless request.query_string.blank?
+        params << request.query_string unless query_string_blank?
+
         if request.post? && request.content_type == Mime::Type.lookup("application/x-www-form-urlencoded")
           params << request.raw_post
         end
@@ -49,9 +43,9 @@ module OAuth::RequestProxy
 
       params.
         join('&').split('&').
-        reject { |kv| kv =~ /^oauth_signature=.*/}.
         reject(&:blank?).
-        map { |p| p.split('=').map{|esc| CGI.unescape(esc)} }
+        map { |p| p.split('=').map{|esc| CGI.unescape(esc)} }.
+        reject { |kv| kv[0] == 'oauth_signature'}
     end
 
   protected

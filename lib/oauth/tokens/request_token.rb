@@ -9,9 +9,13 @@ module OAuth
       build_authorize_url(consumer.authorize_url, params)
     end
 
+    def callback_confirmed?
+      params[:oauth_callback_confirmed] == "true"
+    end
+
     # exchange for AccessToken on server
-    def get_access_token(options = {})
-      response = consumer.token_request(consumer.http_method, (consumer.access_token_url? ? consumer.access_token_url : consumer.access_token_path), self, options)
+    def get_access_token(options = {}, *arguments)
+      response = consumer.token_request(consumer.http_method, (consumer.access_token_url? ? consumer.access_token_url : consumer.access_token_path), self, options, *arguments)
       OAuth::AccessToken.from_hash(consumer, response)
     end
 
